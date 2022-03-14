@@ -1,4 +1,32 @@
-let storesArr = [`Site Number &#9660`,'All',1,102,103,104,105,106,108,114,117,118,119,120,121,123,126,132,137,138,139,145,148,149,152,155,158,159,163,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,193,194,195,196,197,198,199,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,263,264,400,500,601,602,603,604,605,606,607,608,609,610,611,612];
+let allowedJobs = {
+    "STORE_ASSOCIATE":  [
+        "Gun Range Associate",
+        "Sales Associate ",
+        "Cashier ",
+        "Cust Serv Associate "
+
+    ],
+    "ICS":  [
+        "ICS H"
+    ],
+    "STORE_MANAGER":"Store Manager ",
+    "OFFICE_MANAGER":"Office Manager S",
+    "DEPARTMENT_MANAGER":   [
+        "Department Manager H",
+        "Department Manager S",
+        "Hunting Lead ",
+        "Archery Lead ",
+        "Assist Hunt Manager ",
+        "Gun Range Lead"
+    ],
+    "RECEIVING_MGR":    [
+        "In-store EComm Associate",
+        "Receiving Associate ",
+        "Receiving Manager "
+    ]
+}
+
+let storesArr = [`Site Number &#9660`,'All',1,2,102,103,104,105,106,108,114,117,118,119,120,121,123,126,132,137,138,139,145,148,149,152,155,158,159,163,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,193,194,195,196,197,198,199,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,263,264,400,500,601,602,603,604,605,606,607,608,609,610,611,612];
 let testArr = [1,2]
 
 var script = document.createElement('script');
@@ -6,6 +34,20 @@ script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
 script.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(script);
 
+// function oops() {
+//     let oops = document.getElementById('oops');
+//     if (document.getElementById('dropbtn').innerHTML == "Site Number &#9660") {
+//         oops.innerHTML = "Please select a site.";
+//         oops.className = "error";
+//         return true;
+//     }
+//     else {
+//         oops.innerHTML = "";
+//         oops.className = "nevermind";
+//         return false;
+//     }
+
+// }
 
 function populateDrop(arr) {
     function createOption(val, i) {
@@ -126,6 +168,42 @@ function createTable2(userArr, nameArr, siteArr, IDArr) {
     table.appendChild(tBody);
 }
 
+//Lists the people who shouldn't have accounts in a table. 
+function createTable3(userArr, nameArr, siteArr, ultiSiteArr) {
+    function createTableCell(str) {
+        let cell = document.createElement('td');
+        cell.innerHTML = str;
+        return cell;
+    }
+    let title = document.getElementById('titleOfTable');
+    title.innerHTML = `<h3>Employees that do not have the correct primary site:</h3>`;
+    let table = document.getElementById('table3');
+    let leftTitle = createTableCell("Username");
+    let midTitle = createTableCell("Name");
+    let rightTitle = createTableCell("Site #");
+    let right2Title = createTableCell("UltiPro Site #");
+    let tHead = document.createElement('THEAD');
+    let firstRow = document.createElement('TR');
+    tHead.appendChild(firstRow);
+    firstRow.appendChild(leftTitle);
+    firstRow.appendChild(midTitle);
+    firstRow.appendChild(rightTitle);
+    firstRow.appendChild(right2Title);
+    firstRow.style.fontWeight = 'bold';
+    firstRow.style.fontSize = "xx-large";
+    table.appendChild(firstRow);
+    let tBody = document.createElement('TBODY');
+    for (let i = 0; i < userArr.length; i++) {
+        let row = document.createElement('TR');
+        row.appendChild(createTableCell(nameArr[i]));
+        row.appendChild(createTableCell(userArr[i]));
+        row.appendChild(createTableCell(siteArr[i]));
+        row.appendChild(createTableCell(ultiSiteArr[i]));
+        tBody.appendChild(row);
+    }    
+    table.appendChild(tBody);
+}
+
 
 
 //This will standardize the case of each name. 
@@ -196,7 +274,32 @@ function compare(json1, json2) {
     //     obj2[c].LastName = standardName(obj2[c].LastName);
     // }
 
-    let badPeople = {"Employees":{"Name":[],"UserName":[],"SiteNumber":[]},"notHaveUltipro":{"Name":[],"UserName":[],"CorrectID":[],"SiteNumber":[]}}; 
+    let badPeople = {
+        "Employees":{
+            "Name":[],
+            "UserName":[],
+            "SiteNumber":[]
+        },
+        "notHaveUltipro":{
+            "Name":[],
+            "UserName":[],
+            "CorrectID":[],
+            "SiteNumber":[],
+            "UltiSite":[]
+        },
+        "badLocation":{
+            "Name":[],
+            "UserName":[],
+            "SiteNumber":[],
+            "UltiSite":[]
+        },
+        "badJob":{
+            "Name":[],
+            "UserName":[],
+            "RetailRole":[],
+            "Job":[]
+        }
+    }; 
     //let nonEmployee = [];
     for (let i = 0; i < obj2.length; i++) {
         //Look at first and Last name in oracle list (obj2)
@@ -208,7 +311,7 @@ function compare(json1, json2) {
         let alreadyDone = false;
 
         //Only look at people in that store
-        if (tmpStore == buttonVal || (buttonVal == "All" || buttonVal == "Site Number &#9660")) {
+        if (tmpStore == buttonVal || (buttonVal == "All" || buttonVal == "Site Number ▼")) {
 
             for (let x = 0; x < badPeople["Employees"].length; x++){
                 if (!alreadyDone) {
@@ -234,11 +337,14 @@ function compare(json1, json2) {
                                     badPeople["notHaveUltipro"].CorrectID.push(obj1[a].EmployeeNumber);
                                     badPeople["notHaveUltipro"].SiteNumber.push(tmpStore);
                                 }
-                                // else if(obj2[i].UltiProID == "\r" && obj1[a].LastName == "") {
-                                //     badPeople["notHaveUltipro"].Name.push(tmpFirst + " " + tmpLast);
-                                //     badPeople["notHaveUltipro"].UserName.push(tmpUser);
-                                // }
                             } 
+                        }
+                        //push to badLocation if the primary site doesn't match the ultipro site
+                        if (tmpStore != obj1[a].LocationCode) {
+                            badPeople["badLocation"].Name.push(tmpFirst + " " + tmpLast);
+                            badPeople["badLocation"].UserName.push(tmpUser);
+                            badPeople["badLocation"].SiteNumber.push(tmpStore);
+                            badPeople["badLocation"].UltiSite.push(obj1[a].LocationCode);
                         }
                     }
                     badPeople["Employees"].Name.push(tmpFirst + " " + tmpLast);
@@ -267,6 +373,13 @@ function compare(json1, json2) {
                                 // }
                             }
                         }
+                        //push to badLocation if the primary site doesn't match the ultipro site
+                        if (tmpStore != obj1[b].LocationCode) {
+                            badPeople["badLocation"].Name.push(tmpFirst + " " + tmpLast);
+                            badPeople["badLocation"].UserName.push(tmpUser);
+                            badPeople["badLocation"].SiteNumber.push(tmpStore);
+                            badPeople["badLocation"].UltiSite.push(obj1[b].LocationCode);
+                        }
                     }
                     if (!isEmployed && tmpFirst != "Service") {
                         badPeople["Employees"].Name.push(tmpFirst + " " + tmpLast);
@@ -286,45 +399,54 @@ let string2 = "";
 let employeeObject = {};
 myForm.addEventListener("submit", function (e) {
     e.preventDefault();
-    //show the tables
-    document.getElementById('lists').style.display = 'flex';
-    document.getElementById('button').style.display = 'block';
-    document.getElementById('button2').style.display = 'block';
-    //delete any existing info in them
-    let title = document.getElementById('titleOfTable');
-    let table = document.getElementById('table1');
-    title.innerHTML = "";
-    table.innerHTML = "";
-    let title2 = document.getElementById('titleOfUltiTable');
-    let table2 = document.getElementById('table2');
-    title2.innerHTML = "";
-    table2.innerHTML = "";
-
-    //exucute true up
-    const json1 = document.getElementById("JSONFile1");
-    const json2 = document.getElementById("JSONFile2");
-    const input1 = json1.files[0];
-    const input2 = json2.files[0];
-    const reader1 = new FileReader();
-    const reader2 = new FileReader();
-    reader1.onload = function (e) {
-        string1 = e.target.result;
-        // obj1 = JSON.stringify(obj1);
-        //console.log(obj1);
-        
-    };
-    reader1.readAsText(input1);
+    //Check to see if they selected a site
+    // if (oops()) {
+    //     oops();
+    // }
+    // else if (!oops()) {
+    //     oops();
     
-    reader2.onload = function (e) {
-        string2 = e.target.result;
-        //console.log(obj2);
-    };
-    reader2.readAsText(input2);
-    employeeObject = compare(string1, string2);
-//     listString(employeeObject["Employees"]);
-//     listString2(employeeObject["notHaveUltipro"]);
-    createTable(employeeObject["Employees"].Name,  employeeObject["Employees"].UserName, employeeObject["Employees"].SiteNumber);
-    createTable2(employeeObject["notHaveUltipro"].Name, employeeObject["notHaveUltipro"].UserName, employeeObject["notHaveUltipro"].SiteNumber, employeeObject["notHaveUltipro"].CorrectID);
+        //show the tables
+        document.getElementById('lists').style.display = 'flex';
+        document.getElementById('button').style.display = 'block';
+        document.getElementById('button2').style.display = 'block';
+        //delete any existing info in them
+        let title = document.getElementById('titleOfTable');
+        let table = document.getElementById('table1');
+        title.innerHTML = "";
+        table.innerHTML = "";
+        let title2 = document.getElementById('titleOfUltiTable');
+        let table2 = document.getElementById('table2');
+        title2.innerHTML = "";
+        table2.innerHTML = "";
+
+        //exucute true up
+        const json1 = document.getElementById("JSONFile1");
+        const json2 = document.getElementById("JSONFile2");
+        const input1 = json1.files[0];
+        const input2 = json2.files[0];
+        const reader1 = new FileReader();
+        const reader2 = new FileReader();
+        reader1.onload = function (e) {
+            string1 = e.target.result;
+            // obj1 = JSON.stringify(obj1);
+            //console.log(obj1);
+            
+        };
+        reader1.readAsText(input1);
+        
+        reader2.onload = function (e) {
+            string2 = e.target.result;
+            //console.log(obj2);
+        };
+        reader2.readAsText(input2);
+        employeeObject = compare(string1, string2);
+    //     listString(employeeObject["Employees"]);
+    //     listString2(employeeObject["notHaveUltipro"]);
+        createTable(employeeObject["Employees"].Name,  employeeObject["Employees"].UserName, employeeObject["Employees"].SiteNumber);
+        createTable2(employeeObject["notHaveUltipro"].Name, employeeObject["notHaveUltipro"].UserName, employeeObject["notHaveUltipro"].SiteNumber, employeeObject["notHaveUltipro"].CorrectID);
+        createTable3(employeeObject["badLocation"].Name, employeeObject["badLocation"].UserName, employeeObject["badLocation"].SiteNumber, employeeObject["badLocation"].UltiSite);
+    //}
 });
 document.getElementById('button').addEventListener("click", function(obj) {
     let names = obj1ToCSV(employeeObject)
@@ -342,7 +464,7 @@ document.getElementById('button2').addEventListener("click", function(obj) {
     let blob2 = new Blob([[names2]], {type: "application/json"});
     link2.href = URL.createObjectURL(blob2);
     link2.click();
-    URL.revokeObjectURL(link.href);
+    URL.revokeObjectURL(link2.href);
 });
 
 
