@@ -13,7 +13,7 @@ function obj1ToCSV(obj) {
 }
 
 //Lists the people who shouldn't have accounts in a table. 
-function createTable(userArr, nameArr) {
+function createTable(userArr, nameArr, whatsWrongArr) {
     function createTableCell(str) {
         let cell = document.createElement('td');
         cell.innerHTML = str;
@@ -23,11 +23,13 @@ function createTable(userArr, nameArr) {
     title.innerHTML = `<h3>Employees that shouldn't have an active Account:</h3>`;
     let table = document.getElementById('table1');
     let leftTitle = createTableCell("Username");
-    let rightTitle = createTableCell("Name");
+    let midTitle = createTableCell("Name");
+    let rightTitle = createTableCell("What's Wrong?");
     let tHead = document.createElement('THEAD');
     let firstRow = document.createElement('TR');
     tHead.appendChild(firstRow);
     firstRow.appendChild(leftTitle);
+    firstRow.appendChild(midTitle);
     firstRow.appendChild(rightTitle);
     firstRow.style.fontWeight = 'bold';
     firstRow.style.fontSize = "xx-large";
@@ -37,6 +39,7 @@ function createTable(userArr, nameArr) {
         let row = document.createElement('TR');
         row.appendChild(createTableCell(userArr[i]));
         row.appendChild(createTableCell(nameArr[i]));
+        row.appendChild(createTableCell(whatsWrongArr[i]));
         tBody.appendChild(row);
     }    
     table.appendChild(tBody);
@@ -132,7 +135,7 @@ function compare(json1, json2) {
     //     obj2[c].LastName = standardName(obj2[c].LastName);
     // }
 
-    let badPeople = {"Name":[],"UserName":[]};
+    let badPeople = {"Name":[],"UserName":[],"whatsWrong":[]};
     //let nonEmployee = [];
     for (let i = 0; i < obj2.length; i++) {
         //Look at first and Last name in account list (obj2)
@@ -164,10 +167,11 @@ function compare(json1, json2) {
                         }
                     }
                 }
-                if (!isEmployed) {
+                // if (!isEmployed) {
                     badPeople.Name.push(tmpFirst + " " + tmpLast);
                     badPeople.UserName.push(tmpUser);
-                }
+                    badPeople.whatsWrong.push("No First Name");
+                // }
                 // //Find that First and Last name in the Employee list (obj1)
                 // //See if this entry's job is on the allowed job list above
                 // let entryNums = null;
@@ -203,16 +207,50 @@ function compare(json1, json2) {
             if (!alreadyDone) {
                 // Find that Last Name in the employee List
                 let isEmployed = false;
+                let lastNameExists = false;
+                let isNickName = false;
                 for (let b = 0; b < obj1.length; b++) {
                     if (!isEmployed) {
                         if (standardName(obj1[b].LastName) == tmpLast && standardName(obj1[b].FirstName) == tmpFirst) {
                             isEmployed = true;
+                        }
+                        if (obj1[b].PreferredFirstName != "") {
+                            
+                            if (standardName(obj1[b].LastName) == tmpLast && (standardName(obj1[b].PreferredFirstName)).includes(tmpFirst)) {
+                                lastNameExists = true;
+                                isNickName = true;
+                            }
+                            else if (standardName(obj1[b].LastName) == tmpLast && (standardName(obj1[b].PreferredFirstName)).includes(tmpFirst) == false) {
+                                lastNameExists = true;
+                                isNickName = false
+                            }
+                        }
+                        else {
+                            if (standardName(obj1[b].LastName) == tmpLast) {
+                                lastNameExists = true;
+                            }
                         }
                     }
                 }
                 if (!isEmployed) {
                     badPeople.Name.push(tmpFirst + " " + tmpLast);
                     badPeople.UserName.push(tmpUser);
+                    //console.log("Made it");
+                    console.log(badPeople.Name[35]);
+                    if (lastNameExists && isNickName) {
+                        badPeople.whatsWrong.push("Mispelled First Name");
+                        
+                    }
+                    else if (lastNameExists && !isNickName) {
+                        badPeople.whatsWrong.push("Not Employed");
+                    }
+                    else if (!lastNameExists) {
+                        badPeople.whatsWrong.push("Not Employed");
+                    }
+                    else if (lastNameExists) {
+                        badPeople.whatsWrong.push("Unknown");
+                        
+                    }
                 }
             }
         }        
@@ -247,7 +285,7 @@ myForm.addEventListener("submit", function (e) {
     };
     reader2.readAsText(input2);
     employeeObject = compare(string1, string2);
-    createTable(employeeObject.UserName, employeeObject.Name);
+    createTable(employeeObject.UserName, employeeObject.Name, employeeObject.whatsWrong);
 });
 
 document.getElementById('button').addEventListener("click", function(obj) {
